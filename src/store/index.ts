@@ -19,11 +19,17 @@ const localPostsSlice = createSlice({
     },
     removeLocalPost: (state, action: PayloadAction<number>) => {
       state.posts = state.posts.filter(post => post.id !== action.payload)
+    },
+    updateLocalPost: (state, action: PayloadAction<Post>) => {
+      const index = state.posts.findIndex(post => post.id === action.payload.id);
+      if (index !== -1) {
+        state.posts[index] = action.payload;
+      }
     }
   }
 })
-  
-export const { addLocalPost, removeLocalPost } = localPostsSlice.actions
+
+export const { addLocalPost, removeLocalPost, updateLocalPost } = localPostsSlice.actions
   
 export const store = configureStore({
   reducer: {

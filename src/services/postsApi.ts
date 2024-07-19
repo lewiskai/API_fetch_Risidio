@@ -1,11 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export interface Post {
-  userId: number
-  id: number
-  title: string
-  body: string
-  completed?: boolean
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+  completed: boolean;  // Change this from optional to required
 }
 
 export const postsApi = createApi({

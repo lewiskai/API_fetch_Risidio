@@ -10,6 +10,7 @@ interface PostFormProps {
 
 const PostForm: React.FC<PostFormProps> = ({ onNotification }) => {
   const [title, setTitle] = useState('');
+  const [completed, setCompleted] = useState(false);
   const [addPost] = useAddPostMutation();
   const dispatch = useDispatch();
 
@@ -19,12 +20,13 @@ const PostForm: React.FC<PostFormProps> = ({ onNotification }) => {
       const result = await addPost({ 
         title, 
         userId: 1, 
-        completed: false, 
+        completed, 
         body: '' 
       } as Partial<Post>).unwrap();
       
       dispatch(addLocalPost({ ...result, id: Date.now() } as Post));
       setTitle('');
+      setCompleted(false);
       onNotification('Post added successfully!', 'success');
     } catch (err) {
       console.error('Failed to add post: ', err);
@@ -34,7 +36,7 @@ const PostForm: React.FC<PostFormProps> = ({ onNotification }) => {
 
   return (
     <div>
-      <h3 className="mb-3">Add New Post</h3>
+      <h3 className="mb-4">Add New Post</h3>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <input
@@ -46,8 +48,18 @@ const PostForm: React.FC<PostFormProps> = ({ onNotification }) => {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary px-4 mt-3">
-            Add Post
+        <div className="mb-3 form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="completed"
+            checked={completed}
+            onChange={(e) => setCompleted(e.target.checked)}
+          />
+          <label className="form-check-label" htmlFor="completed">Completed</label>
+        </div>
+        <button type="submit" className="btn btn-primary px-4">
+          Add Post
         </button>
       </form>
     </div>

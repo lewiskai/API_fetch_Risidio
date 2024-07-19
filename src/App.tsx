@@ -19,7 +19,7 @@ function App() {
 
   return (
     <div className="App app-container">
-      <h1 className="text-center app-title">Post Management App</h1>
+      <h1 className="text-center app-title">Post Management</h1>
       <div className="notification-container">
         {notification && (
           <Notification
@@ -29,7 +29,7 @@ function App() {
           />
         )}
       </div>
-      <div className="card mb-5">
+      <div className="card mb-4">
         <div className="card-body">
           <PostForm onNotification={showNotification} />
         </div>
