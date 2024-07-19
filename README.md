@@ -66,13 +66,3 @@ npm start
 4. **Deleting Posts**: Posts can be deleted by clicking the "Delete" button.
 5. **Filtering Posts**: Posts can be filtered by completion status and user ID using the dropdown menus.
 6. **Sorting Posts**: Posts can be sorted by clicking on the table headers.
-
-## Contributing to Post Management Application
-
-To contribute to the Post Management Application, follow these steps:
-
-1. Fork this repository.
-2. Create a branch: `git checkout -b <branch_name>`.
-3. Make your changes and commit them: `git commit -m '<commit_message>'`
-4. Push to the original branch: `git push origin <project_name>/<location>`
-5. Create the pull request.
