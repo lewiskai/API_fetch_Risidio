@@ -66,7 +66,7 @@ const PostList: React.FC<PostListProps> = ({ onNotification }) => {
       if (localPosts.some(p => p.id === post.id)) {
         dispatch(removeLocalPost(post.id));
       } else {
-        // For API posts just mark them as deleted in local state
+        // For API posts just mark as deleted in local state
         dispatch(deleteApiPost(post.id));
         // Call the API to simulate the delete operation
         await deletePost(post.id).unwrap();
