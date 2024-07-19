@@ -5,7 +5,7 @@ export interface Post {
   id: number;
   title: string;
   body: string;
-  completed: boolean;  // Change this from optional to required
+  completed: boolean;
 }
 
 export const postsApi = createApi({
