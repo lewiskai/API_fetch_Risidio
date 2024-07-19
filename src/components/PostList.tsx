@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useGetPostsQuery, useDeletePostMutation, Post } from '../services/postsApi';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, removeLocalPost, updateLocalPost } from '../store';
+import { RootState, removeLocalPost, updateLocalPost, updateApiPost, deleteApiPost } from '../store';
 import { NotificationState } from '../App';
 import EditablePost from './EditablePost';
 
@@ -14,21 +14,30 @@ type SortKey = 'title' | 'userId' | 'completed';
 const PostList: React.FC<PostListProps> = ({ onNotification }) => {
   const { data: fetchedPosts, isLoading, isError } = useGetPostsQuery();
   const localPosts = useSelector((state: RootState) => state.localPosts.posts);
+  const apiPostUpdates = useSelector((state: RootState) => state.apiPostUpdates);
   const [deletePost] = useDeletePostMutation();
   const dispatch = useDispatch();
 
   const [sortKey, setSortKey] = useState<SortKey>('title');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [filterCompleted, setFilterCompleted] = useState<boolean | null>(null);
+  const [filterCompleted, setFilterCompleted] = useState<string>('all');
   const [filterUserId, setFilterUserId] = useState<number | null>(null);
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
 
-  const allPosts = useMemo(() => [...localPosts, ...(fetchedPosts || [])], [localPosts, fetchedPosts]);
+  const allPosts = useMemo(() => {
+    const updatedFetchedPosts = fetchedPosts?.map(post => ({
+      ...post,
+      ...apiPostUpdates[post.id]
+    })).filter(post => !(post.id in apiPostUpdates && apiPostUpdates[post.id] === null)) || [];
+    return [...localPosts, ...updatedFetchedPosts];
+  }, [localPosts, fetchedPosts, apiPostUpdates]);
 
   const filteredAndSortedPosts = useMemo(() => {
     return allPosts
       .filter(post => 
-        (filterCompleted === null || post.completed === filterCompleted) &&
+        (filterCompleted === 'all' || 
+         (filterCompleted === 'completed' && post.completed) || 
+         (filterCompleted === 'notCompleted' && !post.completed)) &&
         (filterUserId === null || post.userId === filterUserId)
       )
       .sort((a, b) => {
@@ -57,6 +66,9 @@ const PostList: React.FC<PostListProps> = ({ onNotification }) => {
       if (localPosts.some(p => p.id === post.id)) {
         dispatch(removeLocalPost(post.id));
       } else {
+        // For API posts just mark them as deleted in local state
+        dispatch(deleteApiPost(post.id));
+        // Call the API to simulate the delete operation
         await deletePost(post.id).unwrap();
       }
       onNotification('Post deleted successfully!', 'success');
@@ -77,7 +89,11 @@ const PostList: React.FC<PostListProps> = ({ onNotification }) => {
   };
 
   const handleSave = (updatedPost: Post) => {
-    dispatch(updateLocalPost(updatedPost));
+    if (localPosts.some(p => p.id === updatedPost.id)) {
+      dispatch(updateLocalPost(updatedPost));
+    } else {
+      dispatch(updateApiPost(updatedPost));
+    }
     setEditingPostId(null);
     onNotification('Post updated successfully!', 'success');
   };
@@ -92,23 +108,23 @@ const PostList: React.FC<PostListProps> = ({ onNotification }) => {
   return (
     <div>
       <h3 className="mb-4">Posts</h3>
-      <div className="filter-controls mb-4">
-        <div className="filter-control">
-          <label>Status:</label>
+      <div className="mb-3 d-flex flex-wrap gap-3">
+        <div>
+          <label className="me-2">Filter by Status:</label>
           <select 
-            className="form-select" 
-            value={filterCompleted === null ? '' : filterCompleted.toString()} 
-            onChange={(e) => setFilterCompleted(e.target.value === '' ? null : e.target.value === 'true')}
+            className="form-select form-select-sm" 
+            value={filterCompleted} 
+            onChange={(e) => setFilterCompleted(e.target.value)}
           >
-            <option value="">All</option>
-            <option value="true">Completed</option>
-            <option value="false">Not Completed</option>
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="notCompleted">Not Completed</option>
           </select>
         </div>
-        <div className="filter-control">
-          <label>User ID:</label>
+        <div>
+          <label className="me-2">Filter by User ID:</label>
           <select 
-            className="form-select" 
+            className="form-select form-select-sm" 
             value={filterUserId === null ? '' : filterUserId.toString()} 
             onChange={(e) => setFilterUserId(e.target.value === '' ? null : Number(e.target.value))}
           >

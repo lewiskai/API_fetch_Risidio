@@ -10,12 +10,12 @@ interface EditablePostProps {
 const EditablePost: React.FC<EditablePostProps> = ({ post, onSave, onCancel }) => {
   const [title, setTitle] = useState(post.title);
   const [completed, setCompleted] = useState(post.completed);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({ ...post, title, completed });
   };
-  
+
   return (
     <form onSubmit={handleSubmit} className="d-flex align-items-center gap-2">
       <input
